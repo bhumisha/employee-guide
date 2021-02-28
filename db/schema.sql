@@ -5,7 +5,7 @@ CREATE DATABASE cmsDB;
 USE cmsDB;
 
 
-CREATE TABLE Deparment(
+CREATE TABLE Department(
   id INT NOT NULL AUTO_INCREMENT,
   department VARCHAR(50),
   PRIMARY KEY (id)
@@ -17,8 +17,8 @@ CREATE TABLE Role_Detail (
   salary DECIMAL(10,2),
   department_id INT,
   PRIMARY KEY (id),
-  FOREIGN KEY (department_id)
-        REFERENCES Deparment(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+  FOREIGN KEY (department_id) REFERENCES Department(id) ON UPDATE CASCADE ON DELETE CASCADE
+        
 );
 
 CREATE TABLE Employee (
@@ -28,6 +28,6 @@ CREATE TABLE Employee (
   role_id INT,
   manager_id INT,
   PRIMARY KEY (id),
-  FOREIGN KEY (manager_id)
-        REFERENCES Employee(id) ON UPDATE CASCADE ON DELETE RESTRICT,
+  FOREIGN KEY (role_id) REFERENCES Role_Detail(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (manager_id) REFERENCES Employee(id) ON UPDATE CASCADE ON DELETE SET NULL
 );
