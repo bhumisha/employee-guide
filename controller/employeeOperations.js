@@ -1,117 +1,53 @@
 const connection = require('../db/database');
 const inquirer = require('inquirer');
+const queries = require('../db/queries');
+
+require('console.table');
 
 
-const employeeList = [];
+connection.connect(err => {
+    if (err) throw err;  
+    employeeGuide();
 
-  connection.connect(err => {
-    if (err) throw err;
-    console.log('connected as id ' + connection.threadId);
-   // getEmployeeArray();
-    employeeGuide(); 
-   
-  });
-  
-  afterConnection = () => { 
+});
+
+afterConnection = () => { 
     connection.end();
-  };
-  
+};
 
-getEmployeeArray = () => {
-    connection.promise().query("SELECT * FROM Employee")
-    .then( ([rows,fields]) => {
-            console.log("\n")
-            console.table(rows);
-            employeeList.push(rows);
-    })
-}
+
+
 /**********************************Insert Block Start************************  */
-const addDepartment = (departmentObj) => {
-    const sql = "INSERT INTO Department SET ? ";
+const insertTextRowtoTable = (departmentObj,sqlQuery) => {
+    
     const values =  departmentObj;
     connection.query(
-        sql,
+        sqlQuery,
         values,
         (err,res)=> {
                 if(err) throw err;
-                console.log(res.affectedRows + ' department inserted sucessfully!\n'); 
+                console.log("Record inserted in to the Database."); 
                 employeeGuide();
         });
         
 };  
-
-const addEmployeeRole = (roleObj) => {
-    const sql = "INSERT INTO Role_Detail SET ? ";
-    const values = roleObj;//{ departmentId:roleOb, job_title, salaryj};
-    connection.query(
-        sql,
-        values,
-        (err,res)=> {
-                if(err) throw err;
-                console.log(res.affectedRows + ' employee role inserted sucessfully!\n'); 
-                employeeGuide();
-        });
-
-};  
-
-const addEmployee = (employeeObj) => {
-    const sql = "INSERT INTO Employee SET ? ";
-    const values = employeeObj;//{ departmentId:roleOb, job_title, salaryj};
-    connection.query(
-        sql,
-        values,
-        (err,res)=> {
-                if(err) throw err;
-                console.log(res.affectedRows + ' employee inserted sucessfully!\n'); 
-                employeeGuide();
-    });
-};
-
 /**********************************Insert Block End************************  */
 
 
 /**********************************View / Retrieve Block Start************************  */
-const viewDepartment = () => {
-    // .then( ([rows,fields]) => {
-        connection.query(("SELECT * FROM Department"),(err,res)=>{
+const retrieveSelectedTableData = (sqlQuery) => {
+        
+    connection.promise().query(sqlQuery)
+        .then( ([rows,fields]) => {
                 console.log("\n")
-                console.table(res);
-                employeeGuide();
-          
-        });
+                console.table(rows);
+                employeeGuide();        
+        })
+        .catch(console.log)
   };
 
-const viewRole = () => {
-    const sql = "SELECT empRole.id,department,job_title,salary FROM Role_Detail empRole LEFT JOIN Department ON empRole.department_id = Department.id"
-    connection.promise().query(sql)
-    .then( ([rows,fields]) => {
-            console.log("\n")
-            console.table(rows);
-            employeeGuide();        
-    })
-    .catch(console.log)
-};
-
-const viewEmployee = () => {
-    
-    const query = `SELECT emp.id,emp.first_name,emp.last_name,job_title,salary,department,
-                CONCAT(emp1.first_name ,' ', emp1.last_name) as Manager
-                FROM Employee emp 
-                LEFT JOIN Employee emp1 ON emp.manager_id = emp1.id
-                INNER JOIN Role_Detail ON emp.role_id = Role_Detail.id
-                INNER JOIN Department ON Role_Detail.department_id = Department.id
-                ` 
-                connection.promise().query(query)
-                .then( ([rows,fields]) => {
-                  console.log("\n")
-                  console.table(rows);
-                  employeeGuide();
-                })
-                .catch(console.log)
-        
-};
 const viewByDepartment = () => {
-    let query = "SELECT department FROM Department ORDER BY id";
+    let query = "SELECT * FROM Department ORDER BY id";
     connection.query(query, function(err, res) {
           if (err) throw err;
 
@@ -136,9 +72,8 @@ const viewByDepartment = () => {
     
 };
 
-
 const viewByManager = () => {
-    let query = `SELECT emp1.id, CONCAT(emp1.first_name ,' ', emp1.last_name) as manager
+    let query = `SELECT distinct emp1.id, CONCAT(emp1.first_name ,' ', emp1.last_name) as manager
                  FROM Employee emp 
                  INNER JOIN Employee emp1 ON emp.manager_id = emp1.id`;
     connection.query(query, function(err, res) {
@@ -165,8 +100,9 @@ const viewByManager = () => {
     });
     
 };
+
 const viewEmployeeWithWhereClause = (param) => {
-        const sql = `SELECT emp.id,emp.first_name,emp.last_name,job_title,salary,department,
+        const sql = `SELECT emp.id as ID,emp.first_name as 'First Name',emp.last_name as 'Last Name',job_title as 'Job Title',salary as Salary,department as Department,
         CONCAT(emp1.first_name ,' ', emp1.last_name) as Manager
         FROM Employee emp 
         LEFT JOIN Employee emp1 ON emp.manager_id = emp1.id
@@ -184,6 +120,17 @@ const viewEmployeeWithWhereClause = (param) => {
         })
         .catch(console.log) 
 };
+const viewBudget = (sql , param) => {
+    const whereClause = param!=null ? param : "";
+    const query = sql + whereClause;
+    connection.promise().query(query)
+    .then( ([rows,fields]) => {
+        console.log("\n")
+        console.table(rows);
+        employeeGuide();
+    })
+    .catch(console.log) 
+};
 
 /**********************************View / Retrieve Block End************************  */
 
@@ -198,7 +145,6 @@ const removeItemRowFromTable = (sql,values) => {
                 employeeGuide();
     });
 };
-
 
 const updateEmployeeRole = (parameter) => {
     const sql = "UPDATE Employee SET ? where ? ";
@@ -247,13 +193,13 @@ const promtAddDepartment = () => {
     }
     ]).then(
         departmentObj => {
-        addDepartment(departmentObj);
+            insertTextRowtoTable(departmentObj,queries.INSERT_DEPARTMENT);
     })
 };
 //This function is prompt for Role Data
 const promptAddRole = () => {
     connection.query(
-        "SELECT * FROM Department",
+        queries.RETRIEVE_DEPARTMENT,
         function(err, res) {
           if (err) throw err;
           let departmentList = res.map(item=>item.department);
@@ -287,14 +233,14 @@ const promptAddRole = () => {
             {
                 type: 'list',
                 name: 'department_id',
-                message: 'Please select Department?',
+                message: 'Please select the Department for this job title?',
                 choices:departmentList
             }
     
         ]).then(roleObj =>{
             const departmentObj = res.find(item => item.department=== roleObj.department_id);
             roleObj.department_id = departmentObj.id;
-            addEmployeeRole(roleObj); 
+            insertTextRowtoTable(roleObj,queries.INSERT_ROLE); 
         });
      
     });
@@ -305,16 +251,14 @@ const promptAddRole = () => {
 const promptAddEmployee = () => {
     let roleList = [];
     let employeeList = [];
-    connection.query(
-        "SELECT * FROM Role_Detail",
-        function(err, roleResponse) {
+    connection.query(queries.RETRIEVE_ROLETABLE, function(err, roleResponse) {
           if (err) throw err;
           roleList = roleResponse.map(item=>item.job_title);
-          connection.query(
-            "SELECT * FROM employee",
-            function(err, employeeResponse) {
+
+          connection.query(queries.RETRIEVE_EMPLOYEETABLE,function(err, employeeResponse) {
               if (err) throw err;
                employeeList = employeeResponse.map(item=>item.first_name + ' ' + item.last_name);
+               
                return inquirer.prompt([
                 {
                     type: 'input',
@@ -362,7 +306,7 @@ const promptAddEmployee = () => {
                 employeeObj.manager_id = managerObj.id;
                 
                 console.log(employeeObj);
-                addEmployee(employeeObj);
+                insertTextRowtoTable(employeeObj,queries.INSERT_EMPLOYEE);
             }).catch(err =>{ throw err;})
     
 
@@ -373,29 +317,28 @@ const promptAddEmployee = () => {
 
 const promptDeleteEmployee = () => {
         connection.query(
-            "SELECT * FROM employee",
-            function(err, employeeResponse) {
-              if (err) throw err;
-              let employeeList = employeeResponse.map(item=>item.first_name + ' ' + item.last_name);
-               return inquirer.prompt([
-                {
-                    type: 'list',
-                    name: 'selectedEmployee',
-                    message: "Please select Manager for an employee",
-                    choices:employeeList
-                }
-        ]).then(employeeObj => {
-            const objTobeDelete = employeeResponse.find(item => (item.first_name + ' ' + item.last_name)=== employeeObj.selectedEmployee);
-            const query = "DELETE FROM Employee where id = ? "
-            const param = objTobeDelete.id;
-            removeItemRowFromTable(query,param);
-        })
+        queries.RETRIEVE_EMPLOYEETABLE, function(err, employeeResponse) {
+            if (err) throw err;
+            let employeeList = employeeResponse.map(item=>item.first_name + ' ' + item.last_name);
+
+            return inquirer.prompt([
+            {
+                type: 'list',
+                name: 'selectedEmployee',
+                message: "Please select Manager for an employee",
+                choices:employeeList
+            }
+            ]).then(employeeObj => {
+                const objTobeDelete = employeeResponse.find(item => (item.first_name + ' ' + item.last_name)=== employeeObj.selectedEmployee);
+                const param = objTobeDelete.id;
+                removeItemRowFromTable(queries.DELETE_EMPLOYEE,param);
+            })
     })
 }
 
 const promptDeleteDepartment = () => {
     connection.query(
-        "SELECT * FROM Department order by id",
+        queries.RETRIEVE_DEPARTMENT,
         function(err, departmentRes) {
         if (err) throw err;
         let departmentList = departmentRes.map(item=>item.department);
@@ -408,16 +351,15 @@ const promptDeleteDepartment = () => {
         }
         ]).then(answer => {
             const objTobeDelete = departmentRes.find(item => item.department === answer.selectedDepartment);
-            const query = "DELETE FROM Department where id = ? "
             const param = objTobeDelete.id;
-            removeItemRowFromTable(query,param);
+            removeItemRowFromTable(queries.DELETE_DEPARTMENT,param);
         })
     })
 }
 
 const promptDeleteRole = () => {
     connection.query(
-        "SELECT * FROM Role_Detail order by id",
+        queries.RETRIEVE_ROLETABLE,
         function(err, res) {
         if (err) throw err;
         let roleList = res.map(item=>item.job_title);
@@ -430,9 +372,8 @@ const promptDeleteRole = () => {
         }
         ]).then(answer => {
             const objTobeDelete = res.find(item => item.job_title === answer.selectedRole);
-            const query = "DELETE FROM Role_Detail where id = ? "
             const param = objTobeDelete.id;
-            removeItemRowFromTable(query,param);
+            removeItemRowFromTable(queries.DELETE_ROLE,param);
         })
     })
 }
@@ -441,12 +382,12 @@ const promptUpdateEmpRole = () => {
     let roleList = [];
     let employeeList = [];
     connection.query(
-        "SELECT * FROM employee",
+        queries.RETRIEVE_EMPLOYEETABLE,
             function(err, employeeResponse) {
               if (err) throw err;
                employeeList = employeeResponse.map(item=>item.first_name + ' ' + item.last_name);
                 connection.query(
-                    "SELECT * FROM Role_Detail",
+                    queries.RETRIEVE_ROLETABLE,
                     function(err, roleResponse) {
                     if (err) throw err;
                     roleList = roleResponse.map(item=>item.job_title);
@@ -478,7 +419,6 @@ const promptUpdateEmpRole = () => {
         })
     })
 };
-
 
 const promptUpdateEmpManager = () => {
     let employeeList = [];
@@ -514,12 +454,34 @@ const promptUpdateEmpManager = () => {
 
         })
 };
+
+
+const promptDepartmentForBudget = () => {
+    connection.query(
+        queries.RETRIEVE_DEPARTMENT,
+        function(err, departmentRes) {
+        if (err) throw err;
+        let departmentList = departmentRes.map(item=>item.department);
+        return inquirer.prompt([
+        {
+            type: 'list',
+            name: 'selectedDepartment',
+            message: "Please select the Department to check utilization of budget",
+            choices:departmentList
+        }
+        ]).then(answer => {
+            const objDepartment = departmentRes.find(item => item.department === answer.selectedDepartment);
+            const param = "having department.id = " + objDepartment.id;
+            viewBudget(queries.RETRIEVE_BUDGET_QUERY,param);
+        })
+    })
+}
 //This function is prompt for Employee to choose employee Role.
 const menuOptionPrompt = () =>{
     return inquirer.prompt([
         {
             type: 'list',
-            pageSize: 13,
+            pageSize: 15,
             name: 'operation',
             message: "What would you like to do?",
             choices:['View All Employees',
@@ -535,6 +497,7 @@ const menuOptionPrompt = () =>{
                      'Delete Role', 
                      'Update Employee Role',
                      'Update Employee Manager',
+                     'Utilized budget of a Department',
                      'Exit'
                     ]
         }
@@ -545,10 +508,9 @@ const menuOptionPrompt = () =>{
 const employeeGuide = () => {
     menuOptionPrompt()
     .then((response)=>{
-        console.log(response);
         switch(response.operation){
             case "View All Employees": {
-                viewEmployee();
+                retrieveSelectedTableData(queries.RETRIEVE_EMPLOYEE);
                 break;
             }
             case "View All Employees by Department": {
@@ -560,11 +522,11 @@ const employeeGuide = () => {
                 break;
             }
             case "View All Departments": {
-                viewDepartment();
+                retrieveSelectedTableData(queries.RETRIEVE_DEPARTMENT);
                 break;
             }
             case "View All Roles": {
-                viewRole();
+                retrieveSelectedTableData(queries.RETRIEVE_ROLE);
                 break;
             }
             case "Add Employee": {;
@@ -601,6 +563,12 @@ const employeeGuide = () => {
                 promptUpdateEmpManager();
                 break;
             }
+            case "Utilized budget of a Department": {
+                promptDepartmentForBudget();
+                break;
+            }
+
+            
             case "Exit":{
                 afterConnection();
                 break;
