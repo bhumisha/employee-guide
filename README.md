@@ -1,6 +1,10 @@
 # Employee-Guide
 ## Description
-    Employee Guide is recording and showing all details about the employees of the company. Roles, Managers and Department have been assigned to manager. User can perform DDL and DML operations on given database.
+    Employee Guide is recording and showing all details about the employees of the company. Roles, Managers and Department have been assigned to manager. User can perform DDL and DML operations on given database. MySQL CMS Delationsal Database includes below tables
+    
+    <img width="960" alt="DB_Schema" src="https://user-images.githubusercontent.com/20823163/109540335-27102b00-7a77-11eb-8331-290a6ddea758.png">
+
+    
 
     The Project is developed in node.js. I have used Inquirer node libraries to get different details from user. MySQL is used to store data in database. Mysql2 is npm library which help to connect to database and perfrom DDL, DML operations.
 
@@ -8,7 +12,7 @@
     All code is written in ES6.
 
 ## Installation
-To install following dependencies run the following command:
+To install following dependencies run the following command: it will install, inquirer , console.table, mysql2, node-banner and dotenv libraries
 
 npm install
 
