@@ -17,8 +17,8 @@ const queries =
     CONCAT(emp1.first_name ,' ', emp1.last_name) as Manager
     FROM Employee emp 
     LEFT JOIN Employee emp1 ON emp.manager_id = emp1.id 
-    INNER JOIN Role_Detail ON emp.role_id = Role_Detail.id
-    INNER JOIN Department ON Role_Detail.department_id = Department.id`,
+    LEFT JOIN Role_Detail ON emp.role_id = Role_Detail.id
+    LEFT JOIN Department ON Role_Detail.department_id = Department.id`,
 
 
     RETRIEVE_EMPLOYEETABLE:`SELECT * FROM EMPLOYEE ORDER BY id`,
@@ -28,7 +28,8 @@ const queries =
     DELETE_ROLE :`DELETE FROM Role_Detail where id = ? `,
     DELETE_DEPARTMENT :`DELETE FROM Department where id = ? `,
 
-    RETRIEVE_BUDGET_QUERY:`select department,sum(salary) as budget from role_detail inner join department on role_detail.department_id = department.id group by department,department.id `
+    RETRIEVE_BUDGET_QUERY:`select department,sum(salary) as budget from role_detail INNER JOIN department ON role_detail.department_id = department.id 
+    INNER JOIN Employee ON role_detail.id = Employee.role_id group by department,department.id `
 } 
 
 module.exports = queries;
