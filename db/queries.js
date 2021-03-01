@@ -5,7 +5,7 @@ const queries =
     INSERT_ROLE : `INSERT INTO Role_Detail SET ?  `,
     INSERT_EMPLOYEE : `INSERT INTO Employee SET ?  `,
 
-    RETRIEVE_DEPARTMENT : `SELECT id as ID , department as Department FROM Department
+    RETRIEVE_DEPARTMENT : `SELECT * FROM Department
     ORDER BY id`,
     
     RETRIEVE_ROLE:`SELECT empRole.id as ID,department as Department,job_title as 'Job Title',salary  as Salary

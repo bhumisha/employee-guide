@@ -39,7 +39,6 @@ const retrieveSelectedTableData = (sqlQuery) => {
         
     connection.promise().query(sqlQuery)
         .then( ([rows,fields]) => {
-                console.log("\n")
                 console.table(rows);
                 employeeGuide();        
         })
@@ -92,7 +91,6 @@ const viewByManager = () => {
         ]).then(managerObj =>{
 
             const selectedManager = res.find(item => item.manager === managerObj.manager);
-            console.log(selectedManager);
             const whereClause = " WHERE emp1.id = " + selectedManager.id;
             viewEmployeeWithWhereClause(whereClause); 
         });
@@ -125,7 +123,6 @@ const viewBudget = (sql , param) => {
     const query = sql + whereClause;
     connection.promise().query(query)
     .then( ([rows,fields]) => {
-        console.log("\n")
         console.table(rows);
         employeeGuide();
     })
@@ -304,8 +301,6 @@ const promptAddEmployee = () => {
 
                 const managerObj = employeeResponse.find(item => (item.first_name + ' ' + item.last_name)=== employeeObj.manager_id);
                 employeeObj.manager_id = managerObj.id;
-                
-                console.log(employeeObj);
                 insertTextRowtoTable(employeeObj,queries.INSERT_EMPLOYEE);
             }).catch(err =>{ throw err;})
     

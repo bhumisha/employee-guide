@@ -17,7 +17,7 @@ CREATE TABLE Role_Detail (
   salary DECIMAL(10,2),
   department_id INT,
   PRIMARY KEY (id),
-  FOREIGN KEY (department_id) REFERENCES Department(id) ON UPDATE CASCADE ON DELETE CASCADE
+  FOREIGN KEY (department_id) REFERENCES Department(id) ON UPDATE CASCADE ON DELETE SET NULL
         
 );
 
@@ -28,6 +28,6 @@ CREATE TABLE Employee (
   role_id INT,
   manager_id INT,
   PRIMARY KEY (id),
-  FOREIGN KEY (role_id) REFERENCES Role_Detail(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  FOREIGN KEY (role_id) REFERENCES Role_Detail(id) ON UPDATE CASCADE ON DELETE SET NULL,
   FOREIGN KEY (manager_id) REFERENCES Employee(id) ON UPDATE CASCADE ON DELETE SET NULL
 );
