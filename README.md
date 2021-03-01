@@ -1,10 +1,7 @@
 # Employee-Guide
 ## Description
-    Employee Guide is recording and showing all details about the employees of the company. Roles, Managers and Department have been assigned to manager. User can perform DDL and DML operations on given database. MySQL CMS Delationsal Database includes below tables
-    
-    ![](src/images/DB_Schema.png)
-
-    
+    Employee Guide is recording and showing all details about the employees of the company. Roles, Managers and Department have been assigned to manager. User can perform DDL and DML operations on given database. MySQL CMS Delationsal Database includes Employee / Department and Role tables
+   
     The Project is developed in node.js. I have used Inquirer node libraries to get different details from user. MySQL is used to store data in database. Mysql2 is npm library which help to connect to database and perfrom DDL, DML operations.
 
     If you have not added node than please install node and than npm install. It will deploy all required node modules to project than run node server.js
@@ -35,20 +32,20 @@ https://drive.google.com/file/d/1gO6LIgbnQ0qxvmAxOw0ZnptnwqlHYjnJ/view?usp=shari
 The following screen demonstrates the application functionality
 
 Landing page
-
 ![](src/images/landingPage.png)
 
 View Employee Detail with Role and Department
-
 ![](src/images/ViewAllEmployee.png)
 
 Add new Employee
-
 ![](src/images/addEmployee.png)
 
 View Budget allocated to selected Department
-
 ![](src/images/BudgetDepartmentwise.png)
+
+DB Schema
+ ![](src/images/DB_Schema.png)
+ 
 
 #### Questions
 If you have any additional questions about the repo, open an issue or contact me directly at bhumishadave@gmail.com. You can fine more of my work at bhumisha
